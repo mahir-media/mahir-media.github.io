@@ -79,10 +79,10 @@ $('.x').onclick=()=>dlg.close();
 dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
 dlg.addEventListener('close',()=>cur(true));
 f.addEventListener('submit',async e=>{e.preventDefault();if(f.website.value)return;
- const ep=f.dataset.ep,d=new FormData(f),b=$('button[type=submit]',f);
- if(!ep){location.href=`mailto:mahirmedia.ai@gmail.com?subject=${encodeURIComponent('Project enquiry')}&body=${encodeURIComponent(`Name: ${d.get('name')}\nEmail: ${d.get('email')}\nPhone: ${d.get('phone')||'-'}`)}`;return}
+ const ep=(f.dataset.ep||'').trim(),d=new FormData(f),b=$('button[type=submit]',f);
+ if(!ep||ep.includes('{{')){location.href=`mailto:mahirmedia.ai@gmail.com?subject=${encodeURIComponent('Project enquiry')}&body=${encodeURIComponent(`Name: ${d.get('name')}\nEmail: ${d.get('email')}\nPhone: ${d.get('phone')||'-'}`)}`;return}
  b.disabled=true;msg.textContent='Sending...';
- try{await fetch(ep,{method:'POST',mode:'no-cors',body:new URLSearchParams(d)});f.reset();msg.textContent='Thank you. Your details are in and we will be in touch.';tick(760)}
+ try{const r=await fetch(ep,{method:'POST',body:new URLSearchParams(d)});if(!r.ok||(await r.text()).trim()!=='ok')throw 0;f.reset();msg.textContent='Thank you. Your details are in and we will be in touch.';tick(760)}
  catch(err){msg.textContent='Could not send. Please email mahirmedia.ai@gmail.com directly.'}
  b.disabled=false});
 })();
