@@ -23,40 +23,9 @@ const end=()=>{intro.classList.add('done');document.body.classList.remove('lock'
 if(G)gsap.registerPlugin(ScrollTrigger);
 if(!G||rm){end()}else{setTimeout(end,4000);gsap.timeline({onComplete:end}).to('#intro .o',{strokeDashoffset:0,duration:1.1,ease:'power2.inOut'}).to('#intro .fill',{opacity:1,duration:.4},.8).to(intro,{yPercent:-100,duration:.7,ease:'power3.inOut'},'+=.1')}
 
-/* hero: the brand mark as a 3D object (twin-heart infinity, gold gradient, ember rim light) */
-function hero3d(){
- const cv=$('#gl'),T=window.THREE,fail=()=>$('#hero').classList.add('nogl');
- if(!T)return fail();
- const low=innerWidth<700||(navigator.hardwareConcurrency||4)<4;let R;
- try{R=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:!low})}catch(e){return fail()}
- R.setPixelRatio(Math.min(devicePixelRatio,low?1.5:2));
- const S=new T.Scene(),C=new T.PerspectiveCamera(38,1,.1,60),Gp=new T.Group(),P=[];S.add(Gp);
- for(let i=0;i<240;i++){const t=i/240*6.2832,d=1+Math.sin(t)**2;let x=2.6*Math.cos(t)/d,y=2.6*Math.sin(t)*Math.cos(t)/d;x*=1-.24*Math.exp(-y*y/.16)*Math.pow(Math.abs(x)/2.6,4);P.push(new T.Vector3(x,y*1.6,Math.sin(t*2)*.2))}
- const g=new T.TubeGeometry(new T.CatmullRomCurve3(P,true),400,.17,14,true),p=g.attributes.position,k=[],a=new T.Color('#bb8e4c'),b=new T.Color('#f5e99b'),c=new T.Color();
- for(let i=0;i<p.count;i++){c.copy(a).lerp(b,(p.getX(i)+2.6)/5.2);k.push(c.r,c.g,c.b)}
- g.setAttribute('color',new T.Float32BufferAttribute(k,3));
- Gp.add(new T.Mesh(g,new T.MeshStandardMaterial({vertexColors:true,metalness:.6,roughness:.32})));
- const amb=new T.AmbientLight(0xffffff,.7),key=new T.DirectionalLight(0xfff1d6,1.2),rim=new T.PointLight(0xff5b1f,2.4,14);
- key.position.set(3,4,6);rim.position.set(-5,-2,2.5);S.add(amb,key,rim);
- const N=low?260:620,q=new Float32Array(N*3);
- for(let i=0;i<N;i++){const s=Math.random()*6.283,r=4.3+Math.random()*.9;q.set([Math.cos(s)*r,(Math.random()-.5)*.7,Math.sin(s)*r],i*3)}
- const pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(q,3));
- const dust=new T.Points(pg,new T.PointsMaterial({color:0xd8bb73,size:.045,transparent:true,opacity:.85,depthWrite:false}));dust.rotation.x=.5;S.add(dust);
- const theme=()=>{const l=root.dataset.theme==='light';amb.intensity=l?1:.7;dust.material.color.set(l?0x7a5c12:0xd8bb73)};theme();addEventListener('mm-theme',theme);
- const fit=()=>{const w=cv.clientWidth,h=cv.clientHeight,r=w/h;R.setSize(w,h,false);C.aspect=r;C.position.set(0,r<1?1.2:.4,r<1?15:10.5);C.lookAt(0,.4,0);C.updateProjectionMatrix()};fit();addEventListener('resize',fit);
- let mx=0,my=0,vis=true;const t0=performance.now();
- addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5},{passive:true});
- new IntersectionObserver(([e])=>vis=e.isIntersecting).observe(cv);
- const draw=()=>{const t=(performance.now()-t0)/1e3,s=st.s;Gp.rotation.y+=((Math.sin(t*.5)*.35+mx*.5+s*6.283)-Gp.rotation.y)*.08;Gp.rotation.x+=(my*.3-Gp.rotation.x)*.08;Gp.scale.setScalar(1-s*.4);dust.rotation.y=t*.06;R.render(S,C)};
- if(rm){draw();addEventListener('resize',draw);return}
- (function loop(){requestAnimationFrame(loop);if(vis)draw()})();
-}
-hero3d();
 
 /* scroll story */
 if(G&&!rm){
- ScrollTrigger.create({trigger:'#hero',start:'top top',end:'+=90%',pin:true,onUpdate:s=>st.s=s.progress});
- gsap.to('.hero-copy',{opacity:0,y:-50,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'+=55%',scrub:true}});
  gsap.from('.card',{y:40,opacity:0,stagger:.14,duration:.9,ease:'power3.out',scrollTrigger:{trigger:'#what',start:'top 72%'}});
  gsap.from('.steps li',{y:30,opacity:0,stagger:.15,scrollTrigger:{trigger:'.steps',start:'top 88%'}});
  gsap.fromTo('.wash',{clipPath:'circle(0% at 50% 35%)'},{clipPath:'circle(150% at 50% 35%)',ease:'none',scrollTrigger:{trigger:'#process',start:'top 90%',end:'top 10%',scrub:true}});
@@ -80,9 +49,24 @@ dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
 dlg.addEventListener('close',()=>cur(true));
 f.addEventListener('submit',async e=>{e.preventDefault();if(f.website.value)return;
  const ep=(f.dataset.ep||'').trim(),d=new FormData(f),b=$('button[type=submit]',f);
- if(!ep||ep.includes('{{')){location.href=`mailto:mahirmedia.ai@gmail.com?subject=${encodeURIComponent('Project enquiry')}&body=${encodeURIComponent(`Name: ${d.get('name')}\nEmail: ${d.get('email')}\nPhone: ${d.get('phone')||'-'}`)}`;return}
+ if(!ep||ep.includes('{{')){location.href=`mailto:hello@mahirmedia.studio?subject=${encodeURIComponent('Project enquiry')}&body=${encodeURIComponent(`Name: ${d.get('name')}\nEmail: ${d.get('email')}\nPhone: ${d.get('phone')||'-'}`)}`;return}
  b.disabled=true;msg.textContent='Sending...';
  try{const r=await fetch(ep,{method:'POST',body:new URLSearchParams(d)});if(!r.ok||(await r.text()).trim()!=='ok')throw 0;f.reset();msg.textContent='Thank you. Your details are in and we will be in touch.';tick(760)}
- catch(err){msg.textContent='Could not send. Please email mahirmedia.ai@gmail.com directly.'}
+ catch(err){msg.textContent='Could not send. Please email hello@mahirmedia.studio directly.'}
  b.disabled=false});
+
+/* story: a website assembles itself as you scroll (CSS 3D, no WebGL: light on phones) */
+(()=>{const S=$('#story');if(!S||!G||rm)return;
+ ScrollTrigger.config({ignoreMobileResize:true});S.classList.add('anim');
+ const parts=$$('.pc'),W=innerWidth,H=innerHeight,R=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+ const tl=gsap.timeline({defaults:{ease:'power2.out'},scrollTrigger:{trigger:S,start:'top top',end:'+='+Math.round(H*(W<760?3.2:4)),pin:true,scrub:.6,anticipatePin:1,refreshPriority:1,invalidateOnRefresh:true}});
+ tl.fromTo('.mock',{rotationX:22,rotationY:-22},{rotationX:4,rotationY:-5,ease:'none',duration:1},0);
+ parts.forEach((p,i)=>tl.from(p,{x:(R(i)-.5)*W*1.1,y:(R(i+9)-.5)*H*1.1,z:(R(i+19)-.3)*600,rotationX:(R(i+3)-.5)*140,rotationY:(R(i+5)-.5)*140,rotation:(R(i+7)-.5)*90,scale:.5+R(i+11)*.9,opacity:.4,duration:.42},.04+i*.03));
+ tl.fromTo(parts,{'--f':0},{'--f':1,stagger:.03,duration:.16,ease:'none'},.5)
+   .fromTo('.hd',{'--t':0},{'--t':1,duration:.14,ease:'none'},.72)
+   .to('.copy',{opacity:0,y:-40,duration:.07},.05).set('.copy',{pointerEvents:'none'},.12);
+ $$('.cap p').forEach((c,i)=>{const t=.13+i*.18;tl.fromTo(c,{opacity:0,y:24},{opacity:1,y:0,duration:.05},t).to(c,{opacity:0,y:-24,duration:.05},t+.13)});
+ tl.fromTo('.fin',{opacity:0,y:24},{opacity:1,y:0,duration:.08},.88).set('.fin',{pointerEvents:'auto'},.9);
+ if(fine){const t=$('.tilt'),qx=gsap.quickTo(t,'rotationY',{duration:.8}),qy=gsap.quickTo(t,'rotationX',{duration:.8});addEventListener('pointermove',e=>{qx((e.clientX/innerWidth-.5)*10);qy(-(e.clientY/innerHeight-.5)*8)},{passive:true})}
+})();
 })();
